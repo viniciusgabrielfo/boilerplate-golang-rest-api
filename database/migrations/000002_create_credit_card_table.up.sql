@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS credit_cards (
+    id SERIAL NOT NULL PRIMARY KEY,
+    number TEXT NOT NULL,
+    active BOOL NOT NULL DEFAULT TRUE,
+    user_id INTEGER NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users (id)
+);
