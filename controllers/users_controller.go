@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+
+	"github.com/gorilla/mux"
 )
 
 // JSONUser is a struct to receive and response user data on API
@@ -69,6 +71,13 @@ var GetAllUsers = func(w http.ResponseWriter, r *http.Request) {
 	u.Response(w, allJSONUsers)
 }
 
+var GetUserById = func(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	userId, _ := strconv.Atoi(params["id"])
+
+	u.Response(w, NewJSONUser(*models.GetUserById(userId)))
+}
+
 var UpdateUserById = func(w http.ResponseWriter, r *http.Request) {
 	jUser := &JSONUser{}
 
@@ -82,4 +91,11 @@ var UpdateUserById = func(w http.ResponseWriter, r *http.Request) {
 	models.UpdateUser(userModel)
 
 	u.Response(w, NewJSONUser(*userModel))
+}
+
+var DeleteUserById = func(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	userId, _ := strconv.Atoi(params["id"])
+
+	u.Response(w, models.DeleteUserById(userId))
 }
