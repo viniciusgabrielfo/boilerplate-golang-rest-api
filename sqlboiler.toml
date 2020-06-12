@@ -1,0 +1,11 @@
+output   = "models/schema"
+pkgname  = "schema"
+wipe     = true
+
+[psql]
+dbname = "dbname"
+host   = "dbhost"
+port   = 5432
+user   = "dbuser"
+pass   = "dbpass"
+sslmode = "enable"
