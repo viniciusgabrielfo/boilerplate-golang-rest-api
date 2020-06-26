@@ -30,9 +30,8 @@ var GetAllUsers = func() []*schema.User {
 
 var GetUserById = func(userId int) *schema.User {
 	user, _ := schema.FindUser(context.Background(), database.InstanceDB, userId, "id", "name", "email") // return only id, name and email columns
-
 	if user == nil {
-		fmt.Println("not foun user")
+		fmt.Println("not found user")
 		return user
 	}
 
@@ -52,6 +51,11 @@ var UpdateUser = func(userToUpdate *schema.User) {
 
 var DeleteUserById = func(userId int) bool {
 	user, _ := schema.FindUser(context.Background(), database.InstanceDB, userId)
+	if user == nil {
+		fmt.Println("not found user")
+		return false
+	}
+
 	_, err := user.Delete(context.Background(), database.InstanceDB)
 	if err != nil {
 		fmt.Println("error on delete user")

@@ -14,15 +14,15 @@ import (
 
 // JSONUser is a struct to receive and response user data on API
 type JSONUser struct {
-	ID       string `json:"id"`
+	ID       string `json:"ID"`
 	Name     string `json:"name"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
-// ConvertToModelUser is a function to convert a received JSON from http and convert to model struct type
-func (jUser JSONUser) ConvertToModelUser() *schema.User {
-	userIDConverted, _ := strconv.ParseInt(jUser.ID, 10, 0)
+// ConvertToModel is a function to convert a received JSON from http and convert to model struct type
+func (jUser JSONUser) ConvertToModel() *schema.User {
+	userIDConverted, _ := strconv.Atoi(jUser.ID)
 
 	user := schema.User{
 		ID:       int(userIDConverted),
@@ -34,7 +34,7 @@ func (jUser JSONUser) ConvertToModelUser() *schema.User {
 	return &user
 }
 
-// NewJSONUser is a function to convert a models.PitStop type to a json structure to return in API
+// NewJSONUser is a function to convert a schema.User type to a JSON structure to return in API
 func NewJSONUser(user schema.User) JSONUser {
 	return JSONUser{
 		ID:       strconv.Itoa(int(user.ID)),
@@ -53,7 +53,7 @@ var CreateUser = func(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userModel := jUser.ConvertToModelUser()
+	userModel := jUser.ConvertToModel()
 	models.NewUser(userModel)
 
 	u.Response(w, NewJSONUser(*userModel))
@@ -71,14 +71,14 @@ var GetAllUsers = func(w http.ResponseWriter, r *http.Request) {
 	u.Response(w, allJSONUsers)
 }
 
-var GetUserById = func(w http.ResponseWriter, r *http.Request) {
+var GetUserByID = func(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	userId, _ := strconv.Atoi(params["id"])
 
 	u.Response(w, NewJSONUser(*models.GetUserById(userId)))
 }
 
-var UpdateUserById = func(w http.ResponseWriter, r *http.Request) {
+var UpdateUserByID = func(w http.ResponseWriter, r *http.Request) {
 	jUser := &JSONUser{}
 
 	err := json.NewDecoder(r.Body).Decode(jUser)
@@ -87,15 +87,19 @@ var UpdateUserById = func(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userModel := jUser.ConvertToModelUser()
+	userModel := jUser.ConvertToModel()
 	models.UpdateUser(userModel)
 
 	u.Response(w, NewJSONUser(*userModel))
 }
 
-var DeleteUserById = func(w http.ResponseWriter, r *http.Request) {
+var DeleteUserByID = func(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	userId, _ := strconv.Atoi(params["id"])
 
 	u.Response(w, models.DeleteUserById(userId))
+}
+
+var GetAllCreditCardsByUserID = func(w http.ResponseWriter, r *http.Request) {
+
 }
