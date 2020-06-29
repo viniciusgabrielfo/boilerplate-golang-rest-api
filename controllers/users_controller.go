@@ -101,5 +101,8 @@ var DeleteUserByID = func(w http.ResponseWriter, r *http.Request) {
 }
 
 var GetAllCreditCardsByUserID = func(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	userId, _ := strconv.Atoi(params["id"])
 
+	u.Response(w, models.GetAllCreditCardsByUser(userId))
 }

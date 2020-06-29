@@ -15,6 +15,7 @@ func ChargeRoutes() *mux.Router {
 	router.HandleFunc("/api/users/{id}", controllers.GetUserByID).Methods("GET")
 	router.HandleFunc("/api/users", controllers.UpdateUserByID).Methods("PUT")
 	router.HandleFunc("/api/users/{id}", controllers.DeleteUserByID).Methods("DELETE")
+	router.HandleFunc("/api/users/{id}/creditcards", controllers.GetAllCreditCardsByUserID).Methods("GET")
 
 	// Credit Card handlers
 	router.HandleFunc("/api/creditcards", controllers.CreateCreditCard).Methods("POST")

@@ -36,7 +36,6 @@ var GetAllCreditCards = func() []*schema.CreditCard {
 
 var GetCreditCardById = func(creditCardId int) *schema.CreditCard {
 	creditCard, _ := schema.FindCreditCard(context.Background(), database.InstanceDB, creditCardId)
-	fmt.Println(creditCard)
 	if creditCard == nil {
 		fmt.Println("not found credit card")
 		return creditCard
@@ -69,4 +68,15 @@ var DeleteCreditCardByID = func(creditCardId int) bool {
 	}
 
 	return true
+}
+
+var GetAllCreditCardsByUser = func(userId int) []*schema.CreditCard {
+	user, _ := schema.FindUser(context.Background(), database.InstanceDB, userId)
+	if user == nil {
+		fmt.Println("not found user")
+	}
+
+	creditCards, _ := user.CreditCards().All(context.Background(), database.InstanceDB)
+
+	return creditCards
 }
