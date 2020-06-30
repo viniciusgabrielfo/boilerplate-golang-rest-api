@@ -75,7 +75,7 @@ var GetUserByID = func(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	userId, _ := strconv.Atoi(params["id"])
 
-	u.Response(w, NewJSONUser(*models.GetUserById(userId)))
+	u.Response(w, NewJSONUser(*models.GetUserByID(userId)))
 }
 
 var UpdateUserByID = func(w http.ResponseWriter, r *http.Request) {
@@ -97,7 +97,7 @@ var DeleteUserByID = func(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	userId, _ := strconv.Atoi(params["id"])
 
-	u.Response(w, models.DeleteUserById(userId))
+	u.Response(w, models.DeleteUserByID(userId))
 }
 
 var GetAllCreditCardsByUserID = func(w http.ResponseWriter, r *http.Request) {
