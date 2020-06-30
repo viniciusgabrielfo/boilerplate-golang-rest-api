@@ -76,7 +76,7 @@ var GetCreditCardByID = func(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	creditCardByID, _ := strconv.Atoi(params["id"])
 
-	u.Response(w, NewJSONCreditCard(*models.GetCreditCardById(creditCardByID)))
+	u.Response(w, NewJSONCreditCard(*models.GetCreditCardByID(creditCardByID)))
 }
 
 var UpdateCreditCardByID = func(w http.ResponseWriter, r *http.Request) {

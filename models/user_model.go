@@ -72,7 +72,7 @@ var GetAllUsers = func() []*schema.User {
 	return allUsers
 }
 
-// GetUserByID is a function to retur a single user
+// GetUserByID is a function to return a single user
 var GetUserByID = func(userId int) *schema.User {
 	user, _ := schema.FindUser(context.Background(), database.InstanceDB, userId, "id", "name", "email") // return only id, name and email columns
 	if user == nil {
