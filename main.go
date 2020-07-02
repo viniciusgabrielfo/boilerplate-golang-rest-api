@@ -5,34 +5,29 @@ package main
 import (
 	"boilerplate/app"
 	"boilerplate/database"
-	"fmt"
+	"log"
 	"net/http"
 
 	_ "github.com/golang-migrate/migrate/database/postgres"
 	_ "github.com/golang-migrate/migrate/source/file"
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	// m, err := migrate.New("file://database/migrations",  fmt.Sprintf("%s://%s:%s@%s:%s/%s?sslmode=%s", dbType, dbUser, dbPass, dbHost, dbPort, dbName, dbSSLMode))
+	// Loads values from .env into the system
+	if err := godotenv.Load(); err != nil {
+		log.Print("No .env file found")
+	}
 
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// if err := m.Up(); err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	router := app.ChargeRoutes()
-	database.OpenConnection()
+	router := app.LoadRoutes()
+	database.GenerateDatabaseURL()
+	database.OpenConnectionDatabase()
+	// database.Migrate()
 
 	port := "8000"
-
-	// log := logger.GetLogger()
-	// log.Debugf("Starting API server at %s", port)
-	fmt.Println(port)
-
-	err := http.ListenAndServe(":"+port, router) //Launch the app, visit localhost:8000/api
+	log.Printf("Starting API server at %s port.\n", port)
+	err := http.ListenAndServe(":"+port, router)
 	if err != nil {
-		fmt.Print(err)
+		log.Fatal(err)
 	}
 }

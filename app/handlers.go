@@ -6,7 +6,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func ChargeRoutes() *mux.Router {
+// LoadRoutes is a function to create and return a new *mux.Router and your routes.
+func LoadRoutes() *mux.Router {
 	router := mux.NewRouter()
 
 	// User handlers
