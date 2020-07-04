@@ -61,7 +61,7 @@ var CreateUser = func(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u.Respond(w, http.StatusOK, u.NewResponse(false, "success", NewJSONUser(*userCreated)))
+	u.Respond(w, http.StatusCreated, u.NewResponse(false, "success", NewJSONUser(*userCreated)))
 }
 
 var GetAllUsers = func(w http.ResponseWriter, r *http.Request) {

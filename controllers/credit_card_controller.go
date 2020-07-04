@@ -62,7 +62,7 @@ var CreateCreditCard = func(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u.Respond(w, http.StatusOK, u.NewResponse(false, "success", NewJSONCreditCard(*creditCardCreated)))
+	u.Respond(w, http.StatusCreated, u.NewResponse(false, "success", NewJSONCreditCard(*creditCardCreated)))
 }
 
 var GetAllCreditCards = func(w http.ResponseWriter, r *http.Request) {

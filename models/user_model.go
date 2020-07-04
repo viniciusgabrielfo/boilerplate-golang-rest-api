@@ -101,6 +101,7 @@ var UpdateUser = func(userToUpdate *schema.User) (int64, error) {
 		return 0, err
 	}
 
+	// Validate if there were lines affected
 	if rowsAff < 0 {
 		return 0, errors.New("no affected lines")
 	}
@@ -124,6 +125,7 @@ var DeleteUserByID = func(userId int) (int64, error) {
 		return 0, err
 	}
 
+	// Validate if there were lines affected
 	if rowsAff < 0 {
 		return 0, errors.New("no affected lines")
 	}
