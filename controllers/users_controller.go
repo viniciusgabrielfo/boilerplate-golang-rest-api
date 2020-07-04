@@ -14,7 +14,7 @@ import (
 
 // JSONUser is a struct to receive and response user data on API
 type JSONUser struct {
-	ID       string `json:"ID"`
+	ID       string `json:"id"`
 	Name     string `json:"name"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
@@ -50,17 +50,26 @@ var CreateUser = func(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(jUser)
 	if err != nil {
 		fmt.Println(err)
+		u.Respond(w, http.StatusBadRequest, u.NewResponse(true, "malformed json", nil))
 		return
 	}
 
 	userModel := jUser.ConvertToModel()
-	models.NewUser(userModel)
+	userCreated, err := models.NewUser(userModel)
+	if err != nil {
+		u.Respond(w, http.StatusBadRequest, u.NewResponse(true, err.Error(), nil))
+		return
+	}
 
-	u.Response(w, NewJSONUser(*userModel))
+	u.Respond(w, http.StatusOK, u.NewResponse(false, "success", NewJSONUser(*userCreated)))
 }
 
 var GetAllUsers = func(w http.ResponseWriter, r *http.Request) {
-	allUsers := models.GetAllUsers()
+	allUsers, err := models.GetAllUsers()
+	if err != nil {
+		u.Respond(w, http.StatusBadRequest, u.NewResponse(true, err.Error(), nil))
+		return
+	}
 
 	allJSONUsers := make([]JSONUser, 0)
 
@@ -68,14 +77,25 @@ var GetAllUsers = func(w http.ResponseWriter, r *http.Request) {
 		allJSONUsers = append(allJSONUsers, NewJSONUser(*user))
 	}
 
-	u.Response(w, allJSONUsers)
+	u.Respond(w, http.StatusOK, u.NewResponse(false, "success", allJSONUsers))
 }
 
 var GetUserByID = func(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	userId, _ := strconv.Atoi(params["id"])
+	userID, _ := strconv.Atoi(params["id"])
 
-	u.Response(w, NewJSONUser(*models.GetUserByID(userId)))
+	user, err := models.GetUserByID(userID)
+	if err != nil {
+		u.Respond(w, http.StatusBadRequest, u.NewResponse(true, err.Error(), nil))
+		return
+	}
+
+	if user == nil {
+		u.Respond(w, http.StatusOK, u.NewResponse(false, "not found user", user))
+		return
+	}
+
+	u.Respond(w, http.StatusOK, u.NewResponse(false, "success", NewJSONUser(*user)))
 }
 
 var UpdateUserByID = func(w http.ResponseWriter, r *http.Request) {
@@ -84,25 +104,48 @@ var UpdateUserByID = func(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(jUser)
 	if err != nil {
 		fmt.Println(err)
+		u.Respond(w, http.StatusBadRequest, u.NewResponse(true, "malformed json", nil))
 		return
 	}
 
 	userModel := jUser.ConvertToModel()
-	models.UpdateUser(userModel)
+	rowsAff, err := models.UpdateUser(userModel)
+	if err != nil {
+		u.Respond(w, http.StatusBadRequest, u.NewResponse(true, err.Error(), nil))
+		return
+	}
 
-	u.Response(w, NewJSONUser(*userModel))
+	u.Respond(w, http.StatusOK, u.NewResponse(false, "success", rowsAff))
 }
 
 var DeleteUserByID = func(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	userId, _ := strconv.Atoi(params["id"])
+	userID, _ := strconv.Atoi(params["id"])
 
-	u.Response(w, models.DeleteUserByID(userId))
+	rowsAff, err := models.DeleteUserByID(userID)
+	if err != nil {
+		u.Respond(w, http.StatusBadRequest, u.NewResponse(true, err.Error(), nil))
+		return
+	}
+
+	u.Respond(w, http.StatusOK, u.NewResponse(false, "success", rowsAff))
 }
 
 var GetAllCreditCardsByUserID = func(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	userId, _ := strconv.Atoi(params["id"])
+	userID, _ := strconv.Atoi(params["id"])
 
-	u.Response(w, models.GetAllCreditCardsByUser(userId))
+	creditCards, err := models.GetAllCreditCardsByUser(userID)
+	if err != nil {
+		u.Respond(w, http.StatusBadRequest, u.NewResponse(true, err.Error(), nil))
+		return
+	}
+
+	jCreditCards := make([]JSONCreditCard, 0)
+
+	for _, creditCard := range creditCards {
+		jCreditCards = append(jCreditCards, NewJSONCreditCard(*creditCard))
+	}
+
+	u.Respond(w, http.StatusOK, u.NewResponse(false, "success", creditCards))
 }

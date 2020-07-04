@@ -51,17 +51,26 @@ var CreateCreditCard = func(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(jCreditCard)
 	if err != nil {
 		fmt.Println(err)
+		u.Respond(w, http.StatusBadRequest, u.NewResponse(true, "malformed json", nil))
 		return
 	}
 
 	creditCardModel := jCreditCard.ConvertToModel()
-	models.NewCreditCard(creditCardModel)
+	creditCardCreated, err := models.NewCreditCard(creditCardModel)
+	if err != nil {
+		u.Respond(w, http.StatusBadRequest, u.NewResponse(true, err.Error(), nil))
+		return
+	}
 
-	u.Response(w, NewJSONCreditCard(*creditCardModel))
+	u.Respond(w, http.StatusOK, u.NewResponse(false, "success", NewJSONCreditCard(*creditCardCreated)))
 }
 
 var GetAllCreditCards = func(w http.ResponseWriter, r *http.Request) {
-	allCreditCards := models.GetAllCreditCards()
+	allCreditCards, err := models.GetAllCreditCards()
+	if err != nil {
+		u.Respond(w, http.StatusBadRequest, u.NewResponse(true, err.Error(), nil))
+		return
+	}
 
 	allJSONCreditCards := make([]JSONCreditCard, 0)
 
@@ -69,14 +78,25 @@ var GetAllCreditCards = func(w http.ResponseWriter, r *http.Request) {
 		allJSONCreditCards = append(allJSONCreditCards, NewJSONCreditCard(*creditCard))
 	}
 
-	u.Response(w, allJSONCreditCards)
+	u.Respond(w, http.StatusOK, u.NewResponse(false, "success", allJSONCreditCards))
 }
 
 var GetCreditCardByID = func(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	creditCardByID, _ := strconv.Atoi(params["id"])
 
-	u.Response(w, NewJSONCreditCard(*models.GetCreditCardByID(creditCardByID)))
+	creditCard, err := models.GetCreditCardByID(creditCardByID)
+	if err != nil {
+		u.Respond(w, http.StatusBadRequest, u.NewResponse(true, err.Error(), nil))
+		return
+	}
+
+	if creditCard == nil {
+		u.Respond(w, http.StatusOK, u.NewResponse(false, "not found credit card", creditCard))
+		return
+	}
+
+	u.Respond(w, http.StatusOK, u.NewResponse(false, "success", NewJSONCreditCard(*creditCard)))
 }
 
 var UpdateCreditCardByID = func(w http.ResponseWriter, r *http.Request) {
@@ -85,18 +105,28 @@ var UpdateCreditCardByID = func(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(jCreditCard)
 	if err != nil {
 		fmt.Println(err)
+		u.Respond(w, http.StatusBadRequest, u.NewResponse(true, "malformed json", nil))
 		return
 	}
 
 	creditCardModel := jCreditCard.ConvertToModel()
-	models.UpdateCreditCard(creditCardModel)
+	rowsAff, err := models.UpdateCreditCard(creditCardModel)
+	if err != nil {
+		u.Respond(w, http.StatusBadRequest, u.NewResponse(true, err.Error(), nil))
+		return
+	}
 
-	u.Response(w, NewJSONCreditCard(*creditCardModel))
+	u.Respond(w, http.StatusOK, u.NewResponse(false, "success", rowsAff))
 }
 
 var DeleteCreditCardByID = func(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	creditCardID, _ := strconv.Atoi(params["id"])
 
-	u.Response(w, models.DeleteCreditCardByID(creditCardID))
+	rowsAff, err := models.DeleteCreditCardByID(creditCardID)
+	if err != nil {
+		u.Respond(w, http.StatusBadRequest, u.NewResponse(true, err.Error(), nil))
+	}
+
+	u.Respond(w, http.StatusOK, u.NewResponse(false, "success", rowsAff))
 }
