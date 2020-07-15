@@ -49,7 +49,7 @@ func OpenConnectionDatabase() {
 	log.Println("Database connected and InstanceDB was generated.")
 }
 
-// Migrate is a function to execute migrations.
+// Migrate is a function to up new migrations
 func Migrate() {
 	// Validates if databaseURL was defined
 	if databaseURL == "" {
@@ -57,11 +57,16 @@ func Migrate() {
 	}
 
 	m, err := migrate.New("file://database/migrations", databaseURL)
-
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// Applicate all up migrate before currently version
 	if err := m.Up(); err != nil {
+		if err.Error() == "no change" {
+			log.Println("No new migrations to migrate.")
+			return
+		}
 		log.Fatal(err)
 	}
 }

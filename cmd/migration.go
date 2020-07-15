@@ -1,12 +1,8 @@
 package main
 
-//go:generate sqlboiler --wipe psql
-
 import (
-	"boilerplate/app"
 	"boilerplate/database"
 	"log"
-	"net/http"
 
 	_ "github.com/golang-migrate/migrate/database/postgres"
 	_ "github.com/golang-migrate/migrate/source/file"
@@ -19,15 +15,8 @@ func main() {
 		log.Print("No .env file found")
 	}
 
-	router := app.LoadRoutes()
 	database.GenerateDatabaseURL()
-	database.OpenConnectionDatabase()
-	// database.Migrate()
+	database.Migrate()
 
-	port := "8000"
-	log.Printf("Starting API server at %s port.\n", port)
-	err := http.ListenAndServe(":"+port, router)
-	if err != nil {
-		log.Fatal(err)
-	}
+	log.Println("Migration was succesfully executed.")
 }
