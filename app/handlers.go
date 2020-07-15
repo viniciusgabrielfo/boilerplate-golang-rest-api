@@ -2,6 +2,8 @@ package app
 
 import (
 	"boilerplate/controllers"
+	u "boilerplate/utils"
+	"net/http"
 
 	"github.com/gorilla/mux"
 )
@@ -10,20 +12,24 @@ import (
 func LoadRoutes() *mux.Router {
 	router := mux.NewRouter()
 
+	// Auth handlers
+	router.HandleFunc("/api/login", controllers.Signin).Methods("POST")
+	router.HandleFunc("/api/refresh", controllers.Refresh).Methods("POST")
+
 	// User handlers
-	router.HandleFunc("/api/users", controllers.CreateUser).Methods("POST")
-	router.HandleFunc("/api/users", controllers.GetAllUsers).Methods("GET")
-	router.HandleFunc("/api/users/{id}", controllers.GetUserByID).Methods("GET")
-	router.HandleFunc("/api/users", controllers.UpdateUserByID).Methods("PUT")
-	router.HandleFunc("/api/users/{id}", controllers.DeleteUserByID).Methods("DELETE")
-	router.HandleFunc("/api/users/{id}/creditcards", controllers.GetAllCreditCardsByUserID).Methods("GET")
+	router.Handle("/api/users", u.IsAuthorizedMiddleware(http.HandlerFunc(controllers.CreateUser))).Methods("POST")
+	router.Handle("/api/users", u.IsAuthorizedMiddleware(http.HandlerFunc(controllers.GetAllUsers))).Methods("GET")
+	router.Handle("/api/users/{id}", u.IsAuthorizedMiddleware(http.HandlerFunc(controllers.GetUserByID))).Methods("GET")
+	router.Handle("/api/users", u.IsAuthorizedMiddleware(http.HandlerFunc(controllers.UpdateUserByID))).Methods("PUT")
+	router.Handle("/api/users/{id}", u.IsAuthorizedMiddleware(http.HandlerFunc(controllers.DeleteUserByID))).Methods("DELETE")
+	router.Handle("/api/users/{id}/creditcards", u.IsAuthorizedMiddleware(http.HandlerFunc(controllers.GetAllCreditCardsByUserID))).Methods("GET")
 
 	// Credit Card handlers
-	router.HandleFunc("/api/creditcards", controllers.CreateCreditCard).Methods("POST")
-	router.HandleFunc("/api/creditcards", controllers.GetAllCreditCards).Methods("GET")
-	router.HandleFunc("/api/creditcards/{id}", controllers.GetCreditCardByID).Methods("GET")
-	router.HandleFunc("/api/creditcards", controllers.UpdateCreditCardByID).Methods("PUT")
-	router.HandleFunc("/api/creditcards/{id}", controllers.DeleteCreditCardByID).Methods("DELETE")
+	router.Handle("/api/creditcards", u.IsAuthorizedMiddleware(http.HandlerFunc(controllers.CreateCreditCard))).Methods("POST")
+	router.Handle("/api/creditcards", u.IsAuthorizedMiddleware(http.HandlerFunc(controllers.GetAllCreditCards))).Methods("GET")
+	router.Handle("/api/creditcards/{id}", u.IsAuthorizedMiddleware(http.HandlerFunc(controllers.GetCreditCardByID))).Methods("GET")
+	router.Handle("/api/creditcards", u.IsAuthorizedMiddleware(http.HandlerFunc(controllers.UpdateCreditCardByID))).Methods("PUT")
+	router.Handle("/api/creditcards/{id}", u.IsAuthorizedMiddleware(http.HandlerFunc(controllers.DeleteCreditCardByID))).Methods("DELETE")
 
 	return router
 }

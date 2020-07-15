@@ -7,6 +7,7 @@ import (
 	"errors"
 	"log"
 
+	"github.com/volatiletech/null"
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries/qm"
 )
@@ -38,6 +39,29 @@ var validateUserData = func(user *schema.User) (bool, string) {
 
 	// Validation passed
 	return true, ""
+}
+
+// Authenticate is a function to validate user password, finding by email
+var Authenticate = func(email, password string) (bool, error) {
+	user, err := schema.Users(qm.Select("password"), qm.Where("email=?", email)).One(context.Background(), database.InstanceDB)
+	if err != nil {
+		if err.Error() == "sql: no rows in result set" {
+			return false, errors.New("not found user by e-mail")
+		}
+
+		log.Println(err)
+		return false, err
+	}
+
+	if user == nil {
+		return false, errors.New("not found user by e-mail")
+	}
+
+	if password != user.Password {
+		return false, errors.New("password don't match")
+	}
+
+	return true, nil
 }
 
 // NewUser is a function to insert a single new user into database
@@ -75,9 +99,20 @@ var GetAllUsers = func() ([]*schema.User, error) {
 	return allUsers, nil
 }
 
-// GetUserByID is a function to return a single user
+// GetUserByID is a function to return a single user by ID
 var GetUserByID = func(userId int) (*schema.User, error) {
 	user, err := schema.FindUser(context.Background(), database.InstanceDB, userId, "id", "name", "email") // return only id, name and email columns
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	return user, nil
+}
+
+// GetUserByToken is a function to return a single user by refresh_token
+var GetUserByToken = func(refreshToken string) (*schema.User, error) {
+	user, err := schema.Users(schema.UserWhere.RefreshToken.EQ(null.StringFrom(refreshToken))).One(context.Background(), database.InstanceDB)
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -96,6 +131,38 @@ var UpdateUser = func(userToUpdate *schema.User) (int64, error) {
 
 	// Update user with userToUpdate data
 	rowsAff, err := userToUpdate.Update(context.Background(), database.InstanceDB, boil.Whitelist("name", "email")) // only update name and email columns
+	if err != nil {
+		log.Println(err)
+		return 0, err
+	}
+
+	// Validate if there were lines affected
+	if rowsAff < 0 {
+		return 0, errors.New("no affected lines")
+	}
+
+	// Return affected rows with update
+	return rowsAff, nil
+}
+
+// UpdateRefreshTokenByEmail is a function to update refresh token from a single user by email
+var UpdateRefreshTokenByEmail = func(email string, refreshToken string) (int64, error) {
+	// Validate if exist user with email
+	user, err := schema.Users(qm.Select("id"), qm.Where("email=?", email)).One(context.Background(), database.InstanceDB)
+	if err != nil {
+		if err.Error() == "sql: no rows in result set" {
+			return 0, errors.New("not found user by e-mail")
+		}
+
+		log.Println(err)
+		return 0, err
+	}
+
+	// Set refresh token to exist schema.User
+	user.RefreshToken = null.StringFrom(refreshToken)
+
+	// Update refresh token user
+	rowsAff, err := user.Update(context.Background(), database.InstanceDB, boil.Whitelist("refresh_token")) // only update refres_token column
 	if err != nil {
 		log.Println(err)
 		return 0, err
