@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/friendsofgo/errors"
+	"github.com/volatiletech/null"
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries"
 	"github.com/volatiletech/sqlboiler/queries/qm"
@@ -23,39 +24,67 @@ import (
 
 // User is an object representing the database table.
 type User struct {
-	ID       int    `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Name     string `boil:"name" json:"name" toml:"name" yaml:"name"`
-	Email    string `boil:"email" json:"email" toml:"email" yaml:"email"`
-	Password string `boil:"password" json:"password" toml:"password" yaml:"password"`
+	ID           int         `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Name         string      `boil:"name" json:"name" toml:"name" yaml:"name"`
+	Email        string      `boil:"email" json:"email" toml:"email" yaml:"email"`
+	Password     string      `boil:"password" json:"password" toml:"password" yaml:"password"`
+	RefreshToken null.String `boil:"refresh_token" json:"refresh_token,omitempty" toml:"refresh_token" yaml:"refresh_token,omitempty"`
 
 	R *userR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L userL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var UserColumns = struct {
-	ID       string
-	Name     string
-	Email    string
-	Password string
+	ID           string
+	Name         string
+	Email        string
+	Password     string
+	RefreshToken string
 }{
-	ID:       "id",
-	Name:     "name",
-	Email:    "email",
-	Password: "password",
+	ID:           "id",
+	Name:         "name",
+	Email:        "email",
+	Password:     "password",
+	RefreshToken: "refresh_token",
 }
 
 // Generated where
 
+type whereHelpernull_String struct{ field string }
+
+func (w whereHelpernull_String) EQ(x null.String) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpernull_String) NEQ(x null.String) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpernull_String) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpernull_String) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+func (w whereHelpernull_String) LT(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpernull_String) LTE(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpernull_String) GT(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpernull_String) GTE(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
 var UserWhere = struct {
-	ID       whereHelperint
-	Name     whereHelperstring
-	Email    whereHelperstring
-	Password whereHelperstring
+	ID           whereHelperint
+	Name         whereHelperstring
+	Email        whereHelperstring
+	Password     whereHelperstring
+	RefreshToken whereHelpernull_String
 }{
-	ID:       whereHelperint{field: "\"users\".\"id\""},
-	Name:     whereHelperstring{field: "\"users\".\"name\""},
-	Email:    whereHelperstring{field: "\"users\".\"email\""},
-	Password: whereHelperstring{field: "\"users\".\"password\""},
+	ID:           whereHelperint{field: "\"users\".\"id\""},
+	Name:         whereHelperstring{field: "\"users\".\"name\""},
+	Email:        whereHelperstring{field: "\"users\".\"email\""},
+	Password:     whereHelperstring{field: "\"users\".\"password\""},
+	RefreshToken: whereHelpernull_String{field: "\"users\".\"refresh_token\""},
 }
 
 // UserRels is where relationship names are stored.
@@ -79,8 +108,8 @@ func (*userR) NewStruct() *userR {
 type userL struct{}
 
 var (
-	userAllColumns            = []string{"id", "name", "email", "password"}
-	userColumnsWithoutDefault = []string{"name", "email", "password"}
+	userAllColumns            = []string{"id", "name", "email", "password", "refresh_token"}
+	userColumnsWithoutDefault = []string{"name", "email", "password", "refresh_token"}
 	userColumnsWithDefault    = []string{"id"}
 	userPrimaryKeyColumns     = []string{"id"}
 )
