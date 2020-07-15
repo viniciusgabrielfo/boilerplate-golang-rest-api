@@ -17,7 +17,7 @@ func LoadRoutes() *mux.Router {
 	router.HandleFunc("/api/refresh", controllers.Refresh).Methods("POST")
 
 	// User handlers
-	router.Handle("/api/users", u.IsAuthorizedMiddleware(http.HandlerFunc(controllers.CreateUser))).Methods("POST")
+	router.HandleFunc("/api/users", controllers.CreateUser).Methods("POST")
 	router.Handle("/api/users", u.IsAuthorizedMiddleware(http.HandlerFunc(controllers.GetAllUsers))).Methods("GET")
 	router.Handle("/api/users/{id}", u.IsAuthorizedMiddleware(http.HandlerFunc(controllers.GetUserByID))).Methods("GET")
 	router.Handle("/api/users", u.IsAuthorizedMiddleware(http.HandlerFunc(controllers.UpdateUserByID))).Methods("PUT")
