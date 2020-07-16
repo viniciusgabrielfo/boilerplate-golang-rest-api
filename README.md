@@ -1,5 +1,5 @@
 # boilerplate-restful-golang-api
 
-### A simple boilerplate for RESTful Golang API
+### A simple boilerplate for REST API in Golang
 
-*Under development...*
+*README Under development...*
